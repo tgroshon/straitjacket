@@ -1,6 +1,6 @@
 name: java
-visible_name: Java 7 (OpenJDK)
-version: "1.7.0_79"
+visible_name: Java 8 (OpenJDK)
+version: "1.8.0_60"
 compiler_profile: straitjacket/compiler/java
 apparmor_profile: straitjacket/compiled/java
 filename: Main.java
@@ -13,32 +13,29 @@ tests:
   simple:
     source: |
       import java.io.BufferedReader;
-      import java.io.InputStreamReader;
       import java.io.IOException;
+      import java.io.InputStreamReader;
       import java.util.ArrayList;
+      import java.util.List;
 
       public class Main {
-        public static void main(String[] args) {
-          BufferedReader bi = new BufferedReader(new InputStreamReader(System.in));
-          String line;
-          ArrayList<String> lines = new ArrayList<String>();
-
-          try {
-            while ((line = bi.readLine()) != null) {
-              lines.add(line);
-            }
-          } catch(IOException e) { }
-
-          for (String l : lines) {
-            System.out.println(processLine(l));
+          public static void main(String[] args) {
+              BufferedReader bi = new BufferedReader(new InputStreamReader(System.in));
+              String line;
+              List<Integer> lines = new ArrayList<>();
+              try {
+                  while ((line = bi.readLine()) != null) {
+                      //put this statement inside of try, in case something other than a number is entered
+                      lines.add(Integer.valueOf(line));
+                  }
+              } catch (IOException | NumberFormatException e) {
+              }
+              lines
+                      .stream()
+                      .map(n -> n * 2)
+                      .forEach(System.out::println);
           }
-        }
-
-        static String processLine(String line) {
-          int number = Integer.parseInt(line);
-          return Integer.toString(number * 2);
-        }
-      }
+    }
     stdin:  "1\n2\n3\n"
     stdout: "\\A2\n4\n6\n\\z"
     stderr:
@@ -57,23 +54,20 @@ tests:
 
   apparmor:
     source: |
-      import java.io.*;
+      import java.nio.file.Files;
+      import java.nio.file.Paths;
+      import java.util.stream.Stream;
+
       public class Main {
-       public static void main(String[] args) {
-         try {
-           DataInputStream in = new DataInputStream(
-                                   new FileInputStream("/etc/hosts"));
-           BufferedReader br = new BufferedReader(new InputStreamReader(in));
-           String line;
-           while ((line = br.readLine()) != null) {
-             System.out.println(line);
-           }
-           in.close();
-         } catch (Exception e) {
-           System.err.println("SJ Error: " + e.getMessage());
-         }
-       }
-      }
+          public static void main(String[] args) {
+              try {
+                  Stream<String> lines = Files.lines(Paths.get("/etc/hosts"));
+                  lines.forEach(System.out::println);
+              } catch (Exception e) {
+                  System.err.println("SJ Error: " + e.getMessage());
+              }
+          }
+    }
     stdout: "\\A\\z"
     stderr: 'SJ Error: /etc/hosts \(Permission denied\)'
     exitstatus: 0
