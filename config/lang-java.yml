@@ -31,11 +31,11 @@ tests:
               } catch (IOException | NumberFormatException e) {
               }
               lines
-                      .stream()
-                      .map(n -> n * 2)
-                      .forEach(System.out::println);
+                .stream()
+                .map(n -> n * 2)
+                .forEach(System.out::println);
           }
-    }
+      }
     stdin:  "1\n2\n3\n"
     stdout: "\\A2\n4\n6\n\\z"
     stderr:
@@ -67,7 +67,7 @@ tests:
                   System.err.println("SJ Error: " + e.getMessage());
               }
           }
-    }
+      }
     stdout: "\\A\\z"
     stderr: 'SJ Error: /etc/hosts \(Permission denied\)'
     exitstatus: 0
